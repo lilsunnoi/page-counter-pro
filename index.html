@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องมือนับหน้าเอกสาร แยกสี-ขาวดำ | PDF Page Color Counter</title>
+    <!-- Google Fonts: Inter and Kanit for Thai support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon">
+                    <i data-lucide="copy"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>PageCounter <span>Pro</span></h1>
+                    <p>ระบบแยกหน้าเอกสาร ขาวดำ-สี อัตโนมัติ</p>
+                </div>
+            </div>
+            <div class="theme-toggle" id="themeToggleBtn" title="เปลี่ยนธีม">
+                <i data-lucide="sun" class="sun-icon"></i>
+                <i data-lucide="moon" class="moon-icon"></i>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="app-content">
+            <!-- Left Column: Controls and Settings -->
+            <section class="control-panel">
+                <!-- Dropzone -->
+                <div class="card upload-card">
+                    <div class="drop-zone" id="dropZone">
+                        <input type="file" id="fileInput" accept="application/pdf" multiple style="display: none;">
+                        <div class="drop-zone-content">
+                            <div class="upload-icon-pulse">
+                                <i data-lucide="file-up"></i>
+                            </div>
+                            <h3>ลากไฟล์ PDF มาวางที่นี่</h3>
+                            <p>หรือคลิกเพื่อเลือกไฟล์จากเครื่อง</p>
+                            <span class="file-limits">รองรับเฉพาะไฟล์ .pdf</span>
+                        </div>
+                    </div>
+                    <!-- Selected Files List -->
+                    <div id="fileQueue" class="file-queue hidden">
+                        <h4>ไฟล์ที่เลือก:</h4>
+                        <div class="queue-list" id="queueList"></div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="card settings-card">
+                    <div class="card-header">
+                        <i data-lucide="sliders"></i>
+                        <h3>ตั้งค่าการตรวจสอบ & ราคา</h3>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <label for="colorThreshold">ความเข้มข้นของสี (Threshold)</label>
+                                <span class="val-badge" id="thresholdVal">18</span>
+                            </div>
+                            <input type="range" id="colorThreshold" min="5" max="50" value="18" class="slider">
+                            <span class="setting-desc">ค่าความแตกต่างของสี R, G, B (ค่าน้อย = จับสีได้ไวขึ้น)</span>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <label for="minColorPercent">สัดส่วนสีขั้นต่ำต่อหน้า (%)</label>
+                                <span class="val-badge" id="percentVal">0.3%</span>
+                            </div>
+                            <input type="range" id="minColorPercent" min="0.05" max="5.00" step="0.05" value="0.30" class="slider">
+                            <span class="setting-desc">เปอร์เซ็นต์พิกเซลสีต่อหนึ่งหน้า เพื่อจำแนกเป็นหน้าสี</span>
+                        </div>
+
+                        <div class="setting-item-toggle">
+                            <div class="toggle-info">
+                                <label for="ignoreBackground">ข้ามสีพื้นหลังกระดาษสแกน</label>
+                                <span class="setting-desc">ข้ามสีโทนเหลือง/เทาอ่อนของกระดาษเก่าจากการสแกน</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="ignoreBackground" checked>
+                                <span class="toggle-slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <!-- Price Settings -->
+                    <div class="price-settings">
+                        <h4>คำนวณราคาค่าพิมพ์</h4>
+                        <div class="price-inputs">
+                            <div class="price-input-group">
+                                <label for="priceBW">ขาวดำ (บาท/หน้า)</label>
+                                <div class="input-wrapper">
+                                    <span class="input-prefix">฿</span>
+                                    <input type="number" id="priceBW" min="0" value="1.00" step="0.5">
+                                </div>
+                            </div>
+                            <div class="price-input-group">
+                                <label for="priceColor">หน้าสี (บาท/หน้า)</label>
+                                <div class="input-wrapper">
+                                    <span class="input-prefix">฿</span>
+                                    <input type="number" id="priceColor" min="0" value="5.00" step="0.5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary btn-block" id="applySettingsBtn">
+                        <i data-lucide="refresh-cw"></i>
+                        วิเคราะห์ไฟล์ใหม่อีกครั้ง
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Column: Results & Dashboard -->
+            <section class="results-panel">
+                <!-- Status bar for processing -->
+                <div id="statusAlert" class="status-alert hidden">
+                    <div class="spinner"></div>
+                    <div class="status-text">
+                        <h4 id="statusTitle">กำลังโหลดเอกสาร...</h4>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+                        </div>
+                        <p id="statusDetail">กรุณารอสักครู่ ระบบกำลังอ่านข้อมูลหน้า...</p>
+                    </div>
+                    <button id="cancelProcessBtn" class="btn-icon" title="ยกเลิก">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+
+                <!-- Dashboard Statistics -->
+                <div class="dashboard-grid">
+                    <div class="stat-card total-card">
+                        <div class="stat-icon">
+                            <i data-lucide="files"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">หน้าทั้งหมด</span>
+                            <span class="stat-value" id="statTotalPages">0</span>
+                            <span class="stat-subtext" id="statTotalFiles">0 ไฟล์</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card bw-card">
+                        <div class="stat-icon">
+                            <i data-lucide="file-text"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">ขาวดำ (B&W)</span>
+                            <span class="stat-value" id="statBWPages">0</span>
+                            <span class="stat-subtext" id="statBWPercent">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card color-card">
+                        <div class="stat-icon">
+                            <i data-lucide="palette"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">หน้าสี (Color)</span>
+                            <span class="stat-value" id="statColorPages">0</span>
+                            <span class="stat-subtext" id="statColorPercent">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card cost-card">
+                        <div class="stat-icon">
+                            <i data-lucide="credit-card"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">ประมาณการราคารวม</span>
+                            <span class="stat-value text-gradient" id="statTotalCost">฿0.00</span>
+                            <span class="stat-subtext">อิงตามการตั้งค่าราคา</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Breakdown Grid -->
+                <div class="card detail-card">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            <i data-lucide="layout-grid"></i>
+                            <h3>รายละเอียดแต่ละหน้า</h3>
+                        </div>
+                        <div class="detail-actions">
+                            <button id="exportReportBtn" class="btn btn-primary btn-sm hidden" disabled>
+                                <i data-lucide="printer"></i> พิมพ์ใบเสร็จ
+                            </button>
+                            <button id="clearAllBtn" class="btn btn-danger btn-sm hidden">
+                                <i data-lucide="trash-2"></i> ล้างข้อมูล
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">
+                            <i data-lucide="file-search"></i>
+                        </div>
+                        <h4>ยังไม่มีข้อมูลที่จะแสดง</h4>
+                        <p>กรุณาอัปโหลดไฟล์ PDF เพื่อทำการประเมินหน้าสีและขาวดำ</p>
+                    </div>
+
+                    <!-- Page Grid Container -->
+                    <div class="page-grid hidden" id="pageGrid"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal" id="previewModal">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalCloseBtn">
+                <i data-lucide="x"></i>
+            </button>
+            <div class="modal-body">
+                <div class="modal-preview-container">
+                    <canvas id="modalCanvas"></canvas>
+                </div>
+                <div class="modal-sidebar">
+                    <h3 id="modalPageTitle">หน้าเอกสาร</h3>
+                    <div class="modal-info-group">
+                        <span class="info-label">ขนาดรูปภาพ:</span>
+                        <span class="info-val" id="modalPageSize">0 x 0 px</span>
+                    </div>
+                    <div class="modal-info-group">
+                        <span class="info-label">พิกเซลสีตรวจพบ:</span>
+                        <span class="info-val" id="modalColorPercent">0%</span>
+                    </div>
+                    <div class="modal-info-group">
+                        <span class="info-label">การจัดประเภท:</span>
+                        <span class="info-val" id="modalStatusBadge">ขาวดำ</span>
+                    </div>
+                    
+                    <div class="modal-action-box">
+                        <p>หากวิเคราะห์ผิดพลาด สามารถคลิกเปลี่ยนสลับประเภทได้ด้านล่าง</p>
+                        <button class="btn btn-secondary btn-block" id="modalToggleBtn">
+                            <i data-lucide="shuffle"></i> สลับประเภท (สี &lt;-&gt; ขาวดำ)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF.js CDN library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="app.js" type="module"></script>
+</body>
+</html>
