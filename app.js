@@ -8,6 +8,7 @@ const state = {
     pages: [], // Array of analyzed page objects
     isProcessing: false,
     cancelRequested: false,
+    qrCodeDataUrl: null, // Base64 data URL of uploaded QR Code
     settings: {
         colorThreshold: 18,
         minColorPercent: 0.30,
@@ -41,6 +42,11 @@ const doc = {
     priceColor: document.getElementById('priceColor'),
     applySettingsBtn: document.getElementById('applySettingsBtn'),
     
+    // QR Code settings
+    qrInput: document.getElementById('qrInput'),
+    qrPreviewBox: document.getElementById('qrPreviewBox'),
+    removeQrBtn: document.getElementById('removeQrBtn'),
+    
     // Stats dashboard
     statTotalPages: document.getElementById('statTotalPages'),
     statTotalFiles: document.getElementById('statTotalFiles'),
@@ -72,6 +78,7 @@ const doc = {
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     setupEventListeners();
+    initQrCode();
     initLucide();
 });
 
@@ -79,6 +86,29 @@ document.addEventListener('DOMContentLoaded', () => {
 function initLucide() {
     if (window.lucide) {
         window.lucide.createIcons();
+    }
+}
+
+// QR Code Initialization & Preview UI
+function initQrCode() {
+    const savedQr = localStorage.getItem('qr_code_data_url');
+    if (savedQr) {
+        state.qrCodeDataUrl = savedQr;
+        updateQrPreviewUI();
+    }
+}
+
+function updateQrPreviewUI() {
+    if (state.qrCodeDataUrl) {
+        doc.qrPreviewBox.innerHTML = `<img src="${state.qrCodeDataUrl}" class="qr-preview-img" alt="QR Code Preview">`;
+        doc.removeQrBtn.classList.remove('hidden');
+    } else {
+        doc.qrPreviewBox.innerHTML = `
+            <i data-lucide="qr-code" class="qr-placeholder-icon"></i>
+            <span class="qr-upload-text">คลิกเพื่ออัปโหลด QR Code</span>
+        `;
+        doc.removeQrBtn.classList.add('hidden');
+        initLucide();
     }
 }
 
@@ -193,6 +223,33 @@ function setupEventListeners() {
 
     // Export Report
     doc.exportReportBtn.addEventListener('click', exportReport);
+
+    // QR Code Upload Handlers
+    doc.qrPreviewBox.addEventListener('click', () => {
+        doc.qrInput.click();
+    });
+
+    doc.qrInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const dataUrl = event.target.result;
+                state.qrCodeDataUrl = dataUrl;
+                localStorage.setItem('qr_code_data_url', dataUrl);
+                updateQrPreviewUI();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    doc.removeQrBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent triggering file input click
+        state.qrCodeDataUrl = null;
+        localStorage.removeItem('qr_code_data_url');
+        doc.qrInput.value = '';
+        updateQrPreviewUI();
+    });
 
     // Modal Close
     doc.modalCloseBtn.addEventListener('click', closeModal);
@@ -1122,6 +1179,25 @@ function exportReport() {
                     opacity: 0.8;
                 }
                 
+                .receipt-qr-code {
+                    text-align: center;
+                    margin: 20px auto 10px auto;
+                }
+                .qr-title {
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #475569;
+                    margin-bottom: 8px;
+                }
+                .qr-image {
+                    width: 140px;
+                    height: 140px;
+                    border: 1px solid #cbd5e1;
+                    padding: 4px;
+                    border-radius: 8px;
+                    background: white;
+                }
+                
                 @media print {
                     body {
                         background: #ffffff;
@@ -1199,8 +1275,15 @@ function exportReport() {
                 <div class="receipt-footer">
                     <div class="thanks-msg">ขอบคุณที่ใช้บริการ PageCounter Pro</div>
                     <div>ความถูกต้องผ่านการคำนวณแบบแยกหน้าตามสีพิกเซลจริง</div>
+                    ${state.qrCodeDataUrl ? `
+                    <div class="receipt-qr-code">
+                        <div class="qr-title">สแกนเพื่อชำระเงิน / Scan to Pay</div>
+                        <img src="${state.qrCodeDataUrl}" class="qr-image" alt="Payment QR Code">
+                    </div>
+                    ` : `
                     <div class="barcode-placeholder"></div>
                     <div style="font-size: 10px; margin-top: 5px; color: #cbd5e1;">* ${receiptId} *</div>
+                    `}
                 </div>
             </div>
         </body>

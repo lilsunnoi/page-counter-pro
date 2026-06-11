@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="module" crossorigin src="./assets/index-BiRQv7Jf.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CSR3-rIh.css">
+  <script type="module" crossorigin src="./assets/index-CyjkpTdv.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BMCyE3Oz.css">
 </head>
 <body class="dark-theme">
     <div class="app-container">
@@ -114,6 +114,23 @@
                                     <input type="number" id="priceColor" min="0" value="5.00" step="0.5">
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <!-- QR Code Settings -->
+                    <div class="qr-settings">
+                        <h4>QR Code สำหรับชำระเงิน</h4>
+                        <div class="qr-upload-container">
+                            <input type="file" id="qrInput" accept="image/*" style="display: none;">
+                            <div class="qr-preview-box" id="qrPreviewBox">
+                                <i data-lucide="qr-code" class="qr-placeholder-icon"></i>
+                                <span class="qr-upload-text">คลิกเพื่ออัปโหลด QR Code</span>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm btn-block hidden" id="removeQrBtn">
+                                <i data-lucide="trash-2"></i> ลบรูป QR Code
+                            </button>
                         </div>
                     </div>
 

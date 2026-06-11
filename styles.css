@@ -1013,3 +1013,53 @@ input:checked + .toggle-slider:before {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* QR Code Upload Settings styling */
+.qr-settings {
+    margin-top: 16px;
+}
+.qr-settings h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+.qr-upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.qr-preview-box {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.01);
+    transition: all var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 120px;
+}
+.qr-preview-box:hover {
+    border-color: var(--accent-primary);
+    background: rgba(56, 189, 248, 0.02);
+}
+.qr-placeholder-icon {
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+}
+.qr-upload-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.qr-preview-img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+

@@ -116,6 +116,23 @@
                         </div>
                     </div>
 
+                    <div class="settings-divider"></div>
+
+                    <!-- QR Code Settings -->
+                    <div class="qr-settings">
+                        <h4>QR Code สำหรับชำระเงิน</h4>
+                        <div class="qr-upload-container">
+                            <input type="file" id="qrInput" accept="image/*" style="display: none;">
+                            <div class="qr-preview-box" id="qrPreviewBox">
+                                <i data-lucide="qr-code" class="qr-placeholder-icon"></i>
+                                <span class="qr-upload-text">คลิกเพื่ออัปโหลด QR Code</span>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm btn-block hidden" id="removeQrBtn">
+                                <i data-lucide="trash-2"></i> ลบรูป QR Code
+                            </button>
+                        </div>
+                    </div>
+
                     <button class="btn btn-secondary btn-block" id="applySettingsBtn">
                         <i data-lucide="refresh-cw"></i>
                         วิเคราะห์ไฟล์ใหม่อีกครั้ง
