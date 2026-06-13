@@ -85,8 +85,6 @@ const doc = {
     togglePasswordBtn: document.getElementById('togglePasswordBtn'),
     eyeIcon: document.getElementById('eyeIcon'),
     rememberMe: document.getElementById('rememberMe'),
-    helpCredentialsBtn: document.getElementById('helpCredentialsBtn'),
-    credentialsInfoBox: document.getElementById('credentialsInfoBox'),
     loginError: document.getElementById('loginError'),
     logoutBtn: document.getElementById('logoutBtn'),
 
@@ -198,19 +196,15 @@ function setupEventListeners() {
         
         let isValid = false;
         
-        if (username === 'admin' && password === 'password123') {
-            isValid = true;
-        } else {
-            const storedUserJson = localStorage.getItem('user_creds_' + username);
-            if (storedUserJson) {
-                try {
-                    const storedUser = JSON.parse(storedUserJson);
-                    if (storedUser && storedUser.password === password) {
-                        isValid = true;
-                    }
-                } catch (err) {
-                    console.error("Error parsing user credentials:", err);
+        const storedUserJson = localStorage.getItem('user_creds_' + username);
+        if (storedUserJson) {
+            try {
+                const storedUser = JSON.parse(storedUserJson);
+                if (storedUser && storedUser.password === password) {
+                    isValid = true;
                 }
+            } catch (err) {
+                console.error("Error parsing user credentials:", err);
             }
         }
         
@@ -264,17 +258,12 @@ function setupEventListeners() {
         initLucide();
     });
 
-    doc.helpCredentialsBtn.addEventListener('click', () => {
-        doc.credentialsInfoBox.classList.toggle('hidden');
-    });
-
     doc.logoutBtn.addEventListener('click', () => {
         state.isAuthenticated = false;
         localStorage.removeItem('is_authenticated');
         sessionStorage.removeItem('is_authenticated');
         doc.loginOverlay.classList.remove('hidden');
         doc.logoutBtn.classList.add('hidden');
-        doc.credentialsInfoBox.classList.add('hidden');
         clearAllData();
     });
 
@@ -334,7 +323,7 @@ function setupEventListeners() {
             return;
         }
         
-        if (username.toLowerCase() === 'admin' || localStorage.getItem('user_creds_' + username)) {
+        if (localStorage.getItem('user_creds_' + username)) {
             showRegisterError('ชื่อผู้ใช้งานนี้ถูกใช้งานแล้ว กรุณาใช้ชื่ออื่น');
             return;
         }
