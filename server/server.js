@@ -16,7 +16,8 @@ const dbConfig = {
     database: process.env.DB_NAME,
     options: {
         encrypt: true, // Used for Azure SQL or secure connections
-        trustServerCertificate: true // Crucial for local development / testing
+        trustServerCertificate: true, // Crucial for local development / testing
+        instanceName: process.env.DB_INSTANCE || undefined // Support for named instances
     }
 };
 
