@@ -1063,3 +1063,391 @@ input:checked + .toggle-slider:before {
     border: 1px solid var(--border-color);
 }
 
+/* ==========================================================================
+   Login System Styling
+   ========================================================================== */
+
+/* Login Overlay: full screen glassmorphism */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.96), rgba(9, 13, 22, 0.99));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--transition-slow), visibility var(--transition-slow);
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Light Theme Login background */
+.light-theme .login-overlay {
+    background: radial-gradient(circle at 50% 50%, rgba(241, 245, 249, 0.96), rgba(226, 232, 240, 0.99));
+}
+
+.login-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Login Card: Premium Glassmorphism */
+.login-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg), 0 0 40px rgba(56, 189, 248, 0.08);
+    border-radius: var(--border-radius-lg);
+    width: 100%;
+    max-width: 440px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: loginCardAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes loginCardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.login-card.shake {
+    animation: loginShake 0.4s ease;
+}
+
+@keyframes loginShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+
+/* Header */
+.login-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.login-header .logo-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    margin-bottom: 4px;
+}
+
+.login-header h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+.login-header h2 span {
+    color: var(--accent-primary);
+}
+
+.login-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* Form Styling */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
+}
+
+/* Login Input wrapper overrides */
+.login-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.login-input-wrapper .input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-secondary);
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    transition: color var(--transition-fast);
+}
+
+.login-input-wrapper input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 400;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+/* Add padding on the right for password input toggle btn */
+.login-input-wrapper input[type="password"],
+.login-input-wrapper input[type="text"]#loginPassword {
+    padding-right: 46px;
+}
+
+.login-input-wrapper input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.login-input-wrapper input:focus ~ .input-icon {
+    color: var(--accent-primary);
+}
+
+/* Password Toggle Button */
+.btn-toggle-password {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-toggle-password:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Form Options */
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+/* Custom Checkbox */
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.remember-me input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkbox-custom {
+    height: 18px;
+    width: 18px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    transition: all var(--transition-fast);
+}
+
+.remember-me:hover input ~ .checkbox-custom {
+    border-color: var(--accent-primary);
+}
+
+.remember-me input:checked ~ .checkbox-custom {
+    background: var(--accent-gradient);
+    border-color: transparent;
+}
+
+.checkbox-custom:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 3px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.remember-me input:checked ~ .checkbox-custom:after {
+    display: block;
+}
+
+/* Help link */
+.help-text {
+    color: var(--accent-primary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.help-text:hover {
+    text-decoration: underline;
+}
+
+/* Credentials Info Box */
+.credentials-info-box {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: var(--border-radius-sm);
+    padding: 14px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: loginFadeIn 0.3s ease;
+}
+
+.info-box-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.credentials-info-box ul {
+    list-style-type: none;
+    padding-left: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.credentials-info-box code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: var(--accent-primary);
+}
+
+.credentials-info-box p {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Error message styling */
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    color: var(--accent-danger);
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    animation: loginFadeIn 0.3s ease;
+}
+
+@keyframes loginFadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Logout action button styling */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-logout {
+    font-size: 13px;
+    font-weight: 500;
+    height: 44px;
+    border-radius: 22px;
+    padding: 0 18px;
+    transition: all var(--transition-fast);
+}
+
+.btn-logout:hover {
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--accent-danger);
+    border-color: rgba(244, 63, 94, 0.2);
+}
+
+/* Success Message Alert */
+.success-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--accent-success);
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    animation: loginFadeIn 0.3s ease;
+}
+
+/* Switch Form link */
+.form-toggle-link {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 8px;
+    color: var(--text-secondary);
+}
+
+.toggle-link {
+    color: var(--accent-primary);
+    cursor: pointer;
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+
+.toggle-link:hover {
+    text-decoration: underline;
+}
+

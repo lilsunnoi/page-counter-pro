@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="module" crossorigin src="./assets/index-CyjkpTdv.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BMCyE3Oz.css">
+  <script type="module" crossorigin src="./assets/index-CCtVRi9M.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DJQsjcNW.css">
 </head>
 <body class="dark-theme">
     <div class="app-container">
@@ -26,9 +26,15 @@
                     <p>ระบบแยกหน้าเอกสาร ขาวดำ-สี อัตโนมัติ</p>
                 </div>
             </div>
-            <div class="theme-toggle" id="themeToggleBtn" title="เปลี่ยนธีม">
-                <i data-lucide="sun" class="sun-icon"></i>
-                <i data-lucide="moon" class="moon-icon"></i>
+            <div class="header-actions">
+                <div class="theme-toggle" id="themeToggleBtn" title="เปลี่ยนธีม">
+                    <i data-lucide="sun" class="sun-icon"></i>
+                    <i data-lucide="moon" class="moon-icon"></i>
+                </div>
+                <button class="btn btn-secondary btn-logout hidden" id="logoutBtn" title="ออกจากระบบ">
+                    <i data-lucide="log-out"></i>
+                    <span>ออกจากระบบ</span>
+                </button>
             </div>
         </header>
 
@@ -270,6 +276,127 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card" id="loginCard">
+            <div class="login-header">
+                <div class="logo-icon">
+                    <i data-lucide="copy"></i>
+                </div>
+                <h2 id="loginTitle">PageCounter <span>Pro</span></h2>
+                <p id="loginSubtitle">เข้าสู่ระบบเพื่อใช้งานระบบแยกหน้าเอกสาร</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="loginUsername">ชื่อผู้ใช้งาน (Username)</label>
+                    <div class="login-input-wrapper">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input type="text" id="loginUsername" required placeholder="ระบุชื่อผู้ใช้งาน" autocomplete="username">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">รหัสผ่าน (Password)</label>
+                    <div class="login-input-wrapper">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" id="loginPassword" required placeholder="ระบุรหัสผ่าน" autocomplete="current-password">
+                        <button type="button" class="btn-toggle-password" id="togglePasswordBtn" title="แสดง/ซ่อน รหัสผ่าน">
+                            <i data-lucide="eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="login-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkbox-custom"></span>
+                        จดจำฉันในระบบ
+                    </label>
+                    <span class="help-text" id="helpCredentialsBtn">ข้อมูลเข้าระบบ?</span>
+                </div>
+
+                <!-- Credentials Info Box -->
+                <div class="credentials-info-box hidden" id="credentialsInfoBox">
+                    <div class="info-box-header">
+                        <i data-lucide="info"></i>
+                        <h4>ข้อมูลเข้าระบบเริ่มต้น</h4>
+                    </div>
+                    <ul>
+                        <li><strong>ชื่อผู้ใช้งาน:</strong> <code>admin</code></li>
+                        <li><strong>รหัสผ่าน:</strong> <code>password123</code></li>
+                    </ul>
+                    <p>หมายเหตุ: ข้อมูลนี้ถูกกำหนดไว้เป็นค่าเริ่มต้นสำหรับระบบ</p>
+                </div>
+
+                <div class="error-message hidden" id="loginError">
+                    <i data-lucide="alert-circle"></i>
+                    <span>ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง!</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">
+                    <i data-lucide="log-in"></i>
+                    <span>เข้าสู่ระบบ</span>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="login-form hidden">
+                <div class="form-group">
+                    <label for="registerUsername">ชื่อผู้ใช้งาน (Username)</label>
+                    <div class="login-input-wrapper">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input type="text" id="registerUsername" required placeholder="ระบุชื่อผู้ใช้งานสำหรับการสมัคร" autocomplete="username">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword">รหัสผ่าน (Password)</label>
+                    <div class="login-input-wrapper">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" id="registerPassword" required placeholder="ระบุรหัสผ่านสำหรับการสมัคร" autocomplete="new-password">
+                        <button type="button" class="btn-toggle-password" id="toggleRegPasswordBtn" title="แสดง/ซ่อน รหัสผ่าน">
+                            <i data-lucide="eye" id="regEyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerConfirmPassword">ยืนยันรหัสผ่าน (Confirm Password)</label>
+                    <div class="login-input-wrapper">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" id="registerConfirmPassword" required placeholder="ระบุรหัสผ่านอีกครั้ง" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="error-message hidden" id="registerError">
+                    <i data-lucide="alert-circle"></i>
+                    <span id="registerErrorText">กรุณากรอกข้อมูลให้ถูกต้อง!</span>
+                </div>
+
+                <div class="success-message hidden" id="registerSuccess">
+                    <i data-lucide="check-circle"></i>
+                    <span>สมัครสมาชิกสำเร็จ! กำลังสลับไปหน้าเข้าสู่ระบบ...</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="registerSubmitBtn">
+                    <i data-lucide="user-plus"></i>
+                    <span>สมัครสมาชิก</span>
+                </button>
+            </form>
+
+            <div class="form-toggle-link">
+                <p id="goToRegisterText">ยังไม่มีบัญชีใช้งาน? <span class="toggle-link" id="goToRegisterLink">สมัครสมาชิก</span></p>
+                <p id="goToLoginText" class="hidden">มีบัญชีใช้งานอยู่แล้ว? <span class="toggle-link" id="goToLoginLink">เข้าสู่ระบบ</span></p>
+            </div>
+
+            <div class="login-footer">
+                <p>© 2026 PageCounter Pro. สงวนลิขสิทธิ์</p>
             </div>
         </div>
     </div>

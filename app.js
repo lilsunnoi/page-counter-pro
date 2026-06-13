@@ -4,6 +4,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 // Application State
 const state = {
     theme: 'dark', // 'dark' or 'light'
+    isAuthenticated: false, // Whether the user is logged in
     files: [], // Array of File objects currently loaded
     pages: [], // Array of analyzed page objects
     isProcessing: false,
@@ -71,12 +72,44 @@ const doc = {
     modalPageSize: document.getElementById('modalPageSize'),
     modalColorPercent: document.getElementById('modalColorPercent'),
     modalStatusBadge: document.getElementById('modalStatusBadge'),
-    modalToggleBtn: document.getElementById('modalToggleBtn')
+    modalToggleBtn: document.getElementById('modalToggleBtn'),
+
+    // Login elements
+    loginOverlay: document.getElementById('loginOverlay'),
+    loginCard: document.getElementById('loginCard'),
+    loginTitle: document.getElementById('loginTitle'),
+    loginSubtitle: document.getElementById('loginSubtitle'),
+    loginForm: document.getElementById('loginForm'),
+    loginUsername: document.getElementById('loginUsername'),
+    loginPassword: document.getElementById('loginPassword'),
+    togglePasswordBtn: document.getElementById('togglePasswordBtn'),
+    eyeIcon: document.getElementById('eyeIcon'),
+    rememberMe: document.getElementById('rememberMe'),
+    helpCredentialsBtn: document.getElementById('helpCredentialsBtn'),
+    credentialsInfoBox: document.getElementById('credentialsInfoBox'),
+    loginError: document.getElementById('loginError'),
+    logoutBtn: document.getElementById('logoutBtn'),
+
+    // Register elements
+    registerForm: document.getElementById('registerForm'),
+    registerUsername: document.getElementById('registerUsername'),
+    registerPassword: document.getElementById('registerPassword'),
+    registerConfirmPassword: document.getElementById('registerConfirmPassword'),
+    toggleRegPasswordBtn: document.getElementById('toggleRegPasswordBtn'),
+    regEyeIcon: document.getElementById('regEyeIcon'),
+    registerError: document.getElementById('registerError'),
+    registerErrorText: document.getElementById('registerErrorText'),
+    registerSuccess: document.getElementById('registerSuccess'),
+    goToRegisterLink: document.getElementById('goToRegisterLink'),
+    goToLoginLink: document.getElementById('goToLoginLink'),
+    goToRegisterText: document.getElementById('goToRegisterText'),
+    goToLoginText: document.getElementById('goToLoginText')
 };
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    initAuth();
     setupEventListeners();
     initQrCode();
     initLucide();
@@ -112,6 +145,20 @@ function updateQrPreviewUI() {
     }
 }
 
+// Authentication Handling
+function initAuth() {
+    const savedAuth = localStorage.getItem('is_authenticated') === 'true' || sessionStorage.getItem('is_authenticated') === 'true';
+    if (savedAuth) {
+        state.isAuthenticated = true;
+        doc.loginOverlay.classList.add('hidden');
+        doc.logoutBtn.classList.remove('hidden');
+    } else {
+        state.isAuthenticated = false;
+        doc.loginOverlay.classList.remove('hidden');
+        doc.logoutBtn.classList.add('hidden');
+    }
+}
+
 // Theme Handling
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
@@ -142,6 +189,180 @@ function setupEventListeners() {
         state.theme = state.theme === 'dark' ? 'light' : 'dark';
         updateThemeUI();
     });
+
+    // Authentication Listeners
+    doc.loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = doc.loginUsername.value.trim();
+        const password = doc.loginPassword.value;
+        
+        let isValid = false;
+        
+        if (username === 'admin' && password === 'password123') {
+            isValid = true;
+        } else {
+            const storedUserJson = localStorage.getItem('user_creds_' + username);
+            if (storedUserJson) {
+                try {
+                    const storedUser = JSON.parse(storedUserJson);
+                    if (storedUser && storedUser.password === password) {
+                        isValid = true;
+                    }
+                } catch (err) {
+                    console.error("Error parsing user credentials:", err);
+                }
+            }
+        }
+        
+        if (isValid) {
+            state.isAuthenticated = true;
+            doc.loginError.classList.add('hidden');
+            
+            if (doc.rememberMe.checked) {
+                localStorage.setItem('is_authenticated', 'true');
+            } else {
+                sessionStorage.setItem('is_authenticated', 'true');
+            }
+            
+            doc.loginOverlay.classList.add('hidden');
+            doc.logoutBtn.classList.remove('hidden');
+            
+            doc.loginUsername.value = '';
+            doc.loginPassword.value = '';
+        } else {
+            doc.loginError.classList.remove('hidden');
+            doc.loginCard.classList.add('shake');
+            setTimeout(() => {
+                doc.loginCard.classList.remove('shake');
+            }, 400);
+        }
+    });
+
+    doc.togglePasswordBtn.addEventListener('click', () => {
+        const type = doc.loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        doc.loginPassword.setAttribute('type', type);
+        
+        if (type === 'text') {
+            doc.eyeIcon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            doc.eyeIcon.setAttribute('data-lucide', 'eye');
+        }
+        initLucide();
+    });
+
+    doc.toggleRegPasswordBtn.addEventListener('click', () => {
+        const isPassword = doc.registerPassword.getAttribute('type') === 'password';
+        const type = isPassword ? 'text' : 'password';
+        doc.registerPassword.setAttribute('type', type);
+        doc.registerConfirmPassword.setAttribute('type', type);
+        
+        if (type === 'text') {
+            doc.regEyeIcon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            doc.regEyeIcon.setAttribute('data-lucide', 'eye');
+        }
+        initLucide();
+    });
+
+    doc.helpCredentialsBtn.addEventListener('click', () => {
+        doc.credentialsInfoBox.classList.toggle('hidden');
+    });
+
+    doc.logoutBtn.addEventListener('click', () => {
+        state.isAuthenticated = false;
+        localStorage.removeItem('is_authenticated');
+        sessionStorage.removeItem('is_authenticated');
+        doc.loginOverlay.classList.remove('hidden');
+        doc.logoutBtn.classList.add('hidden');
+        doc.credentialsInfoBox.classList.add('hidden');
+        clearAllData();
+    });
+
+    // Form Navigation Toggle Listeners
+    doc.goToRegisterLink.addEventListener('click', () => {
+        doc.loginForm.classList.add('hidden');
+        doc.registerForm.classList.remove('hidden');
+        
+        doc.goToRegisterText.classList.add('hidden');
+        doc.goToLoginText.classList.remove('hidden');
+        
+        doc.loginTitle.innerHTML = 'สมัครสมาชิก <span>Pro</span>';
+        doc.loginSubtitle.textContent = 'สร้างบัญชีผู้ใช้ใหม่สำหรับประเมินหน้าเอกสาร';
+        
+        doc.loginError.classList.add('hidden');
+        doc.registerError.classList.add('hidden');
+        doc.registerSuccess.classList.add('hidden');
+    });
+
+    doc.goToLoginLink.addEventListener('click', () => {
+        doc.registerForm.classList.add('hidden');
+        doc.loginForm.classList.remove('hidden');
+        
+        doc.goToLoginText.classList.add('hidden');
+        doc.goToRegisterText.classList.remove('hidden');
+        
+        doc.loginTitle.innerHTML = 'PageCounter <span>Pro</span>';
+        doc.loginSubtitle.textContent = 'เข้าสู่ระบบเพื่อใช้งานระบบแยกหน้าเอกสาร';
+        
+        doc.loginError.classList.add('hidden');
+        doc.registerError.classList.add('hidden');
+        doc.registerSuccess.classList.add('hidden');
+    });
+
+    // Register Form Handler
+    doc.registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = doc.registerUsername.value.trim();
+        const password = doc.registerPassword.value;
+        const confirmPass = doc.registerConfirmPassword.value;
+        
+        doc.registerError.classList.add('hidden');
+        doc.registerSuccess.classList.add('hidden');
+        
+        if (username.length < 3) {
+            showRegisterError('ชื่อผู้ใช้งานต้องมีความยาวอย่างน้อย 3 ตัวอักษร');
+            return;
+        }
+        
+        if (password.length < 6) {
+            showRegisterError('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+            return;
+        }
+        
+        if (password !== confirmPass) {
+            showRegisterError('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
+            return;
+        }
+        
+        if (username.toLowerCase() === 'admin' || localStorage.getItem('user_creds_' + username)) {
+            showRegisterError('ชื่อผู้ใช้งานนี้ถูกใช้งานแล้ว กรุณาใช้ชื่ออื่น');
+            return;
+        }
+        
+        const userData = { username, password };
+        localStorage.setItem('user_creds_' + username, JSON.stringify(userData));
+        
+        doc.registerSuccess.classList.remove('hidden');
+        
+        doc.registerUsername.value = '';
+        doc.registerPassword.value = '';
+        doc.registerConfirmPassword.value = '';
+        
+        setTimeout(() => {
+            doc.goToLoginLink.click();
+            doc.loginUsername.value = username;
+            doc.loginPassword.focus();
+        }, 1500);
+    });
+
+    function showRegisterError(message) {
+        doc.registerErrorText.textContent = message;
+        doc.registerError.classList.remove('hidden');
+        doc.loginCard.classList.add('shake');
+        setTimeout(() => {
+            doc.loginCard.classList.remove('shake');
+        }, 400);
+    }
 
     // Drag and Drop
     const preventDefaults = (e) => {
