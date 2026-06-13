@@ -5,6 +5,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 const state = {
     theme: 'dark', // 'dark' or 'light'
     isAuthenticated: false, // Whether the user is logged in
+    userRole: 'user', // Role of the logged-in user ('user' or 'admin')
     files: [], // Array of File objects currently loaded
     pages: [], // Array of analyzed page objects
     isProcessing: false,
@@ -154,12 +155,21 @@ function initAuth() {
     const savedAuth = localStorage.getItem('is_authenticated') === 'true' || sessionStorage.getItem('is_authenticated') === 'true';
     if (savedAuth) {
         state.isAuthenticated = true;
+        state.userRole = localStorage.getItem('user_role') || sessionStorage.getItem('user_role') || 'user';
         doc.loginOverlay.classList.add('hidden');
         doc.logoutBtn.classList.remove('hidden');
+        
+        if (state.userRole === 'admin') {
+            doc.adminDashboardBtn.classList.remove('hidden');
+        } else {
+            doc.adminDashboardBtn.classList.add('hidden');
+        }
     } else {
         state.isAuthenticated = false;
+        state.userRole = 'user';
         doc.loginOverlay.classList.remove('hidden');
         doc.logoutBtn.classList.add('hidden');
+        doc.adminDashboardBtn.classList.add('hidden');
     }
 }
 
@@ -211,12 +221,23 @@ function setupEventListeners() {
             
             if (response.ok) {
                 state.isAuthenticated = true;
+                state.userRole = data.role || 'user';
                 doc.loginError.classList.add('hidden');
                 
                 if (doc.rememberMe.checked) {
                     localStorage.setItem('is_authenticated', 'true');
+                    localStorage.setItem('current_username', username);
+                    localStorage.setItem('user_role', state.userRole);
                 } else {
                     sessionStorage.setItem('is_authenticated', 'true');
+                    sessionStorage.setItem('current_username', username);
+                    sessionStorage.setItem('user_role', state.userRole);
+                }
+                
+                if (state.userRole === 'admin') {
+                    doc.adminDashboardBtn.classList.remove('hidden');
+                } else {
+                    doc.adminDashboardBtn.classList.add('hidden');
                 }
                 
                 doc.loginOverlay.classList.add('hidden');
@@ -283,10 +304,16 @@ function setupEventListeners() {
 
     doc.confirmLogoutBtn.addEventListener('click', () => {
         state.isAuthenticated = false;
+        state.userRole = 'user';
         localStorage.removeItem('is_authenticated');
+        localStorage.removeItem('current_username');
+        localStorage.removeItem('user_role');
         sessionStorage.removeItem('is_authenticated');
+        sessionStorage.removeItem('current_username');
+        sessionStorage.removeItem('user_role');
         doc.loginOverlay.classList.remove('hidden');
         doc.logoutBtn.classList.add('hidden');
+        doc.adminDashboardBtn.classList.add('hidden');
         clearAllData();
         closeLogoutModal();
     });
@@ -497,6 +524,31 @@ function setupEventListeners() {
     // Modal Close
     doc.modalCloseBtn.addEventListener('click', closeModal);
     doc.modalOverlay.addEventListener('click', closeModal);
+
+    // Admin Dashboard Listeners
+    doc.adminDashboardBtn.addEventListener('click', openAdminDashboard);
+    
+    const closeAdminModal = () => {
+        doc.adminDashboardModal.classList.remove('open');
+    };
+    
+    doc.adminDashboardModalCloseBtn.addEventListener('click', closeAdminModal);
+    doc.adminDashboardModalOverlay.addEventListener('click', closeAdminModal);
+    doc.refreshAdminDashboardBtn.addEventListener('click', fetchAdminDashboardData);
+    
+    doc.tabLogsBtn.addEventListener('click', () => {
+        doc.tabLogsBtn.classList.add('active');
+        doc.tabUsersBtn.classList.remove('active');
+        doc.tabLogsContent.classList.remove('hidden');
+        doc.tabUsersContent.classList.add('hidden');
+    });
+    
+    doc.tabUsersBtn.addEventListener('click', () => {
+        doc.tabUsersBtn.classList.add('active');
+        doc.tabLogsBtn.classList.remove('active');
+        doc.tabUsersContent.classList.remove('hidden');
+        doc.tabLogsContent.classList.add('hidden');
+    });
 }
 
 // Handle selected files
@@ -677,6 +729,11 @@ async function processFileQueue() {
             } catch (err) {
                 console.error(`Error processing page ${pageNum} of ${file.name}:`, err);
             }
+        }
+        
+        // Log this file's usage to the database
+        if (!state.cancelRequested) {
+            await logServiceUsage(file.name, numPages);
         }
     }
 
@@ -1544,4 +1601,141 @@ function escapeHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+// ==========================================================================
+// Admin Dashboard & Service Logs Functions
+// ==========================================================================
+
+function openAdminDashboard() {
+    doc.adminDashboardModal.classList.add('open');
+    fetchAdminDashboardData();
+}
+
+async function fetchAdminDashboardData() {
+    const requestorUsername = localStorage.getItem('current_username') || sessionStorage.getItem('current_username') || '';
+    
+    if (!requestorUsername) {
+        alert('กรุณาเข้าสู่ระบบอีกครั้งเพื่อเข้าใช้แผงควบคุม');
+        return;
+    }
+    
+    // Set loading spinner state
+    doc.adminLogsTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner" style="margin: 0 auto 10px;"></div>กำลังโหลดประวัติข้อมูล...</td></tr>`;
+    doc.adminUsersTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-muted"><div class="spinner" style="margin: 0 auto 10px;"></div>กำลังโหลดรายชื่อสมาชิก...</td></tr>`;
+    
+    try {
+        const response = await fetch('http://localhost:5000/api/admin/dashboard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requestorUsername })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Update stats counters
+            doc.adminTotalFiles.textContent = data.stats.totalFiles;
+            doc.adminTotalPages.textContent = data.stats.totalPages;
+            doc.adminTotalUsers.textContent = data.users.length;
+            doc.adminTotalRevenue.textContent = `฿${data.stats.totalRevenue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            // Draw Logs Table
+            doc.adminLogsTableBody.innerHTML = '';
+            if (data.recentLogs.length === 0) {
+                doc.adminLogsTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">ไม่พบประวัติการประเมินเอกสารในขณะนี้</td></tr>`;
+            } else {
+                data.recentLogs.forEach(log => {
+                    const row = document.createElement('tr');
+                    const dateStr = new Date(log.createdAt).toLocaleString('th-TH', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    row.innerHTML = `
+                        <td>${dateStr}</td>
+                        <td><strong>${escapeHtml(log.username)}</strong></td>
+                        <td>${escapeHtml(log.fileName)}</td>
+                        <td class="text-center">${log.totalPages}</td>
+                        <td class="text-center">${log.bwPages}</td>
+                        <td class="text-center">${log.colorPages}</td>
+                        <td class="text-center" style="font-weight: 600; color: var(--accent-success);">฿${log.estimatedCost.toFixed(2)}</td>
+                    `;
+                    doc.adminLogsTableBody.appendChild(row);
+                });
+            }
+            
+            // Draw Users Table
+            doc.adminUsersTableBody.innerHTML = '';
+            data.users.forEach(user => {
+                const row = document.createElement('tr');
+                const dateStr = new Date(user.createdAt).toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const roleBadge = user.role === 'admin' 
+                    ? `<span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; padding: 2px 8px; border-radius: 12px; font-weight: 600; font-size: 11px;">Admin</span>`
+                    : `<span style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); padding: 2px 8px; border-radius: 12px; font-size: 11px;">User</span>`;
+                
+                row.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td><strong>${escapeHtml(user.username)}</strong></td>
+                    <td>${roleBadge}</td>
+                `;
+                doc.adminUsersTableBody.appendChild(row);
+            });
+            
+        } else {
+            alert(data.message || 'ดึงข้อมูลไม่สำเร็จ');
+            doc.adminDashboardModal.classList.remove('open');
+        }
+    } catch (err) {
+        console.error('Error fetching admin dashboard statistics:', err);
+        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ฐานข้อมูลเพื่อดึงข้อมูลได้ในขณะนี้');
+        doc.adminDashboardModal.classList.remove('open');
+    }
+}
+
+// Send service usage statistics to SQL Server
+async function logServiceUsage(fileName, numPages) {
+    const username = localStorage.getItem('current_username') || sessionStorage.getItem('current_username') || 'guest';
+    
+    // Count pages for this file
+    const filePages = state.pages.filter(p => p.fileName === fileName);
+    let bwCount = 0;
+    let colorCount = 0;
+    
+    filePages.forEach(p => {
+        const isColor = p.userOverride !== null ? (p.userOverride === 'color') : p.isColor;
+        if (isColor) {
+            colorCount++;
+        } else {
+            bwCount++;
+        }
+    });
+    
+    const cost = (bwCount * state.settings.priceBW) + (colorCount * state.settings.priceColor);
+    
+    try {
+        await fetch('http://localhost:5000/api/logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                fileName,
+                totalPages: numPages,
+                bwPages: bwCount,
+                colorPages: colorCount,
+                estimatedCost: cost
+            })
+        });
+    } catch (err) {
+        console.error('Error logging service usage to database:', err);
+    }
 }
