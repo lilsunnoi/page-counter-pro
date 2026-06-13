@@ -1,6 +1,10 @@
 // Configure PDF.js Worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
+// Backend API Base URL
+// Change this to your public backend server URL when deploying (e.g., 'https://your-api.onrender.com')
+const API_BASE_URL = 'http://localhost:5000';
+
 // Application State
 const state = {
     theme: 'dark', // 'dark' or 'light'
@@ -228,7 +232,7 @@ function setupEventListeners() {
         const password = doc.loginPassword.value;
         
         try {
-            const response = await fetch('http://localhost:5000/api/login', {
+            const response = await fetch(`${API_BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -392,7 +396,7 @@ function setupEventListeners() {
         }
         
         try {
-            const response = await fetch('http://localhost:5000/api/register', {
+            const response = await fetch(`${API_BASE_URL}/api/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -1642,7 +1646,7 @@ async function fetchAdminDashboardData() {
     doc.adminUsersTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-muted"><div class="spinner" style="margin: 0 auto 10px;"></div>กำลังโหลดรายชื่อสมาชิก...</td></tr>`;
     
     try {
-        const response = await fetch('http://localhost:5000/api/admin/dashboard', {
+        const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ requestorUsername })
@@ -1740,7 +1744,7 @@ async function logServiceUsage(fileName, numPages) {
     const cost = (bwCount * state.settings.priceBW) + (colorCount * state.settings.priceColor);
     
     try {
-        await fetch('http://localhost:5000/api/logs', {
+        await fetch(`${API_BASE_URL}/api/logs`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
