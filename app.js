@@ -108,7 +108,24 @@ const doc = {
     logoutModal: document.getElementById('logoutModal'),
     logoutModalOverlay: document.getElementById('logoutModalOverlay'),
     cancelLogoutBtn: document.getElementById('cancelLogoutBtn'),
-    confirmLogoutBtn: document.getElementById('confirmLogoutBtn')
+    confirmLogoutBtn: document.getElementById('confirmLogoutBtn'),
+
+    // Admin Dashboard elements
+    adminDashboardBtn: document.getElementById('adminDashboardBtn'),
+    adminDashboardModal: document.getElementById('adminDashboardModal'),
+    adminDashboardModalOverlay: document.getElementById('adminDashboardModalOverlay'),
+    adminDashboardModalCloseBtn: document.getElementById('adminDashboardModalCloseBtn'),
+    refreshAdminDashboardBtn: document.getElementById('refreshAdminDashboardBtn'),
+    adminTotalFiles: document.getElementById('adminTotalFiles'),
+    adminTotalPages: document.getElementById('adminTotalPages'),
+    adminTotalRevenue: document.getElementById('adminTotalRevenue'),
+    adminTotalUsers: document.getElementById('adminTotalUsers'),
+    tabLogsBtn: document.getElementById('tabLogsBtn'),
+    tabUsersBtn: document.getElementById('tabUsersBtn'),
+    tabLogsContent: document.getElementById('tabLogsContent'),
+    tabUsersContent: document.getElementById('tabUsersContent'),
+    adminLogsTableBody: document.getElementById('adminLogsTableBody'),
+    adminUsersTableBody: document.getElementById('adminUsersTableBody')
 };
 
 // Initialize Application
