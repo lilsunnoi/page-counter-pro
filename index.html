@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="module" crossorigin src="./assets/index-ywukU0hC.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-XrqlEu9G.css">
+  <script type="module" crossorigin src="./assets/index-WEHEKC2o.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-loLXMkOS.css">
 </head>
 <body class="dark-theme">
     <div class="app-container">
@@ -29,6 +29,10 @@
                 </div>
             </div>
             <div class="header-actions">
+                <button class="btn btn-secondary btn-logout hidden" id="adminDashboardBtn" title="แผงควบคุมแอดมิน">
+                    <i data-lucide="line-chart"></i>
+                    <span>แผงควบคุม</span>
+                </button>
                 <div class="theme-toggle" id="themeToggleBtn" title="เปลี่ยนธีม">
                     <i data-lucide="sun" class="sun-icon"></i>
                     <i data-lucide="moon" class="moon-icon"></i>
@@ -402,6 +406,114 @@
                 <div class="confirm-actions">
                     <button class="btn btn-secondary" id="cancelLogoutBtn">ยกเลิก</button>
                     <button class="btn btn-danger" id="confirmLogoutBtn">ออกจากระบบ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div class="modal" id="adminDashboardModal">
+        <div class="modal-overlay" id="adminDashboardModalOverlay"></div>
+        <div class="modal-content admin-dashboard-content">
+            <button class="modal-close" id="adminDashboardModalCloseBtn">
+                <i data-lucide="x"></i>
+            </button>
+            <div class="modal-body admin-modal-body">
+                <div class="dashboard-header-inline">
+                    <h2><i data-lucide="shield-check"></i> แผงควบคุมผู้ดูแลระบบ <span>(Admin Dashboard)</span></h2>
+                    <button class="btn btn-secondary btn-sm" id="refreshAdminDashboardBtn">
+                        <i data-lucide="refresh-cw"></i> รีเฟรชข้อมูล
+                    </button>
+                </div>
+
+                <!-- Admin Statistics Grid -->
+                <div class="admin-stats-grid">
+                    <div class="admin-stat-card">
+                        <div class="stat-icon-bg bg-blue">
+                            <i data-lucide="file-text"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="label">ไฟล์ประเมินทั้งหมด</span>
+                            <span class="value" id="adminTotalFiles">0</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-icon-bg bg-green">
+                            <i data-lucide="copy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="label">จำนวนหน้าทั้งหมด</span>
+                            <span class="value" id="adminTotalPages">0</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-icon-bg bg-purple">
+                            <i data-lucide="credit-card"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="label">รายได้ประมาณการรวม</span>
+                            <span class="value text-gradient" id="adminTotalRevenue">฿0.00</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-icon-bg bg-yellow">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="label">ผู้ใช้ที่ลงทะเบียน</span>
+                            <span class="value" id="adminTotalUsers">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Buttons -->
+                <div class="admin-tab-container">
+                    <button class="admin-tab-btn active" id="tabLogsBtn">ประวัติการใช้บริการล่าสุด</button>
+                    <button class="admin-tab-btn" id="tabUsersBtn">รายชื่อสมาชิกทั้งหมด</button>
+                </div>
+
+                <!-- Tab Contents: Logs Table -->
+                <div class="admin-tab-content" id="tabLogsContent">
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>วัน-เวลา</th>
+                                    <th>ผู้ใช้งาน</th>
+                                    <th>ชื่อไฟล์</th>
+                                    <th>หน้าทั้งหมด</th>
+                                    <th>ขาวดำ</th>
+                                    <th>สี</th>
+                                    <th>ราคารวม</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminLogsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">กำลังโหลดประวัติข้อมูล...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Contents: Users Table -->
+                <div class="admin-tab-content hidden" id="tabUsersContent">
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>วันที่สมัคร</th>
+                                    <th>ชื่อผู้ใช้งาน (Username)</th>
+                                    <th>บทบาท (Role)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTableBody">
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">กำลังโหลดรายชื่อสมาชิก...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
