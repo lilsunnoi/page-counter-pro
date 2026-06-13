@@ -189,41 +189,46 @@ function setupEventListeners() {
     });
 
     // Authentication Listeners
-    doc.loginForm.addEventListener('submit', (e) => {
+    doc.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = doc.loginUsername.value.trim();
         const password = doc.loginPassword.value;
         
-        let isValid = false;
-        
-        const storedUserJson = localStorage.getItem('user_creds_' + username);
-        if (storedUserJson) {
-            try {
-                const storedUser = JSON.parse(storedUserJson);
-                if (storedUser && storedUser.password === password) {
-                    isValid = true;
+        try {
+            const response = await fetch('http://localhost:5000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                state.isAuthenticated = true;
+                doc.loginError.classList.add('hidden');
+                
+                if (doc.rememberMe.checked) {
+                    localStorage.setItem('is_authenticated', 'true');
+                } else {
+                    sessionStorage.setItem('is_authenticated', 'true');
                 }
-            } catch (err) {
-                console.error("Error parsing user credentials:", err);
-            }
-        }
-        
-        if (isValid) {
-            state.isAuthenticated = true;
-            doc.loginError.classList.add('hidden');
-            
-            if (doc.rememberMe.checked) {
-                localStorage.setItem('is_authenticated', 'true');
+                
+                doc.loginOverlay.classList.add('hidden');
+                doc.logoutBtn.classList.remove('hidden');
+                
+                doc.loginUsername.value = '';
+                doc.loginPassword.value = '';
             } else {
-                sessionStorage.setItem('is_authenticated', 'true');
+                doc.loginError.querySelector('span').textContent = data.message || 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง!';
+                doc.loginError.classList.remove('hidden');
+                doc.loginCard.classList.add('shake');
+                setTimeout(() => {
+                    doc.loginCard.classList.remove('shake');
+                }, 400);
             }
-            
-            doc.loginOverlay.classList.add('hidden');
-            doc.logoutBtn.classList.remove('hidden');
-            
-            doc.loginUsername.value = '';
-            doc.loginPassword.value = '';
-        } else {
+        } catch (err) {
+            console.error('Login error:', err);
+            doc.loginError.querySelector('span').textContent = 'ไม่สามารถเชื่อมต่อฐานข้อมูลเซิร์ฟเวอร์ได้';
             doc.loginError.classList.remove('hidden');
             doc.loginCard.classList.add('shake');
             setTimeout(() => {
@@ -299,7 +304,7 @@ function setupEventListeners() {
     });
 
     // Register Form Handler
-    doc.registerForm.addEventListener('submit', (e) => {
+    doc.registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = doc.registerUsername.value.trim();
         const password = doc.registerPassword.value;
@@ -323,25 +328,34 @@ function setupEventListeners() {
             return;
         }
         
-        if (localStorage.getItem('user_creds_' + username)) {
-            showRegisterError('ชื่อผู้ใช้งานนี้ถูกใช้งานแล้ว กรุณาใช้ชื่ออื่น');
-            return;
+        try {
+            const response = await fetch('http://localhost:5000/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                doc.registerSuccess.classList.remove('hidden');
+                
+                doc.registerUsername.value = '';
+                doc.registerPassword.value = '';
+                doc.registerConfirmPassword.value = '';
+                
+                setTimeout(() => {
+                    doc.goToLoginLink.click();
+                    doc.loginUsername.value = username;
+                    doc.loginPassword.focus();
+                }, 1500);
+            } else {
+                showRegisterError(data.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
+            }
+        } catch (err) {
+            console.error('Registration error:', err);
+            showRegisterError('ไม่สามารถเชื่อมต่อฐานข้อมูลเซิร์ฟเวอร์ได้');
         }
-        
-        const userData = { username, password };
-        localStorage.setItem('user_creds_' + username, JSON.stringify(userData));
-        
-        doc.registerSuccess.classList.remove('hidden');
-        
-        doc.registerUsername.value = '';
-        doc.registerPassword.value = '';
-        doc.registerConfirmPassword.value = '';
-        
-        setTimeout(() => {
-            doc.goToLoginLink.click();
-            doc.loginUsername.value = username;
-            doc.loginPassword.focus();
-        }, 1500);
     });
 
     function showRegisterError(message) {
