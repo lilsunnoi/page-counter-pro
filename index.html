@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="module" crossorigin src="./assets/index-ed-tRTXK.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DJQsjcNW.css">
+  <script type="module" crossorigin src="./assets/index-ywukU0hC.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-XrqlEu9G.css">
 </head>
 <body class="dark-theme">
     <div class="app-container">
@@ -385,6 +385,24 @@
 
             <div class="login-footer">
                 <p>© 2026 PageCounter Pro. สงวนลิขสิทธิ์</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal" id="logoutModal">
+        <div class="modal-overlay" id="logoutModalOverlay"></div>
+        <div class="modal-content modal-confirm-content">
+            <div class="modal-confirm-body">
+                <div class="confirm-icon">
+                    <i data-lucide="log-out"></i>
+                </div>
+                <h3>ยืนยันการออกจากระบบ</h3>
+                <p>คุณต้องการออกจากระบบใช่หรือไม่? ข้อมูลการนับหน้าเอกสารปัจจุบันจะถูกล้างออกจากระบบทั้งหมดเพื่อความเป็นส่วนตัว</p>
+                <div class="confirm-actions">
+                    <button class="btn btn-secondary" id="cancelLogoutBtn">ยกเลิก</button>
+                    <button class="btn btn-danger" id="confirmLogoutBtn">ออกจากระบบ</button>
+                </div>
             </div>
         </div>
     </div>
