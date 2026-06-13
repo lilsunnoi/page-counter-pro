@@ -388,6 +388,24 @@
         </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div class="modal" id="logoutModal">
+        <div class="modal-overlay" id="logoutModalOverlay"></div>
+        <div class="modal-content modal-confirm-content">
+            <div class="modal-confirm-body">
+                <div class="confirm-icon">
+                    <i data-lucide="log-out"></i>
+                </div>
+                <h3>ยืนยันการออกจากระบบ</h3>
+                <p>คุณต้องการออกจากระบบใช่หรือไม่? ข้อมูลการนับหน้าเอกสารปัจจุบันจะถูกล้างออกจากระบบทั้งหมดเพื่อความเป็นส่วนตัว</p>
+                <div class="confirm-actions">
+                    <button class="btn btn-secondary" id="cancelLogoutBtn">ยกเลิก</button>
+                    <button class="btn btn-danger" id="confirmLogoutBtn">ออกจากระบบ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- PDF.js CDN library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="app.js" type="module"></script>

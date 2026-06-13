@@ -101,7 +101,13 @@ const doc = {
     goToRegisterLink: document.getElementById('goToRegisterLink'),
     goToLoginLink: document.getElementById('goToLoginLink'),
     goToRegisterText: document.getElementById('goToRegisterText'),
-    goToLoginText: document.getElementById('goToLoginText')
+    goToLoginText: document.getElementById('goToLoginText'),
+
+    // Logout confirmation modal
+    logoutModal: document.getElementById('logoutModal'),
+    logoutModalOverlay: document.getElementById('logoutModalOverlay'),
+    cancelLogoutBtn: document.getElementById('cancelLogoutBtn'),
+    confirmLogoutBtn: document.getElementById('confirmLogoutBtn')
 };
 
 // Initialize Application
@@ -263,13 +269,26 @@ function setupEventListeners() {
         initLucide();
     });
 
+    // Logout Action & Confirmation Modal
     doc.logoutBtn.addEventListener('click', () => {
+        doc.logoutModal.classList.add('open');
+    });
+
+    const closeLogoutModal = () => {
+        doc.logoutModal.classList.remove('open');
+    };
+
+    doc.cancelLogoutBtn.addEventListener('click', closeLogoutModal);
+    doc.logoutModalOverlay.addEventListener('click', closeLogoutModal);
+
+    doc.confirmLogoutBtn.addEventListener('click', () => {
         state.isAuthenticated = false;
         localStorage.removeItem('is_authenticated');
         sessionStorage.removeItem('is_authenticated');
         doc.loginOverlay.classList.remove('hidden');
         doc.logoutBtn.classList.add('hidden');
         clearAllData();
+        closeLogoutModal();
     });
 
     // Form Navigation Toggle Listeners
