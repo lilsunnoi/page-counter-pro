@@ -1,525 +1,614 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PageCounter Pro | เครื่องมือนับหน้าเอกสาร แยกสี-ขาวดำ</title>
+    <title>ChaTime POS | ระบบจัดการร้านขายชา</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='10' y='10' width='80' height='80' rx='22' fill='url(%23grad)'/%3E%3Crect x='28' y='28' width='36' height='44' rx='6' fill='none' stroke='white' stroke-width='6'/%3E%3Crect x='38' y='38' width='36' height='44' rx='6' fill='white'/%3E%3Cline x1='46' y1='48' x2='66' y2='48' stroke='%231e293b' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='46' y1='58' x2='66' y2='58' stroke='%231e293b' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='46' y1='68' x2='58' y2='68' stroke='%231e293b' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
-    <!-- Google Fonts: Inter and Kanit for Thai support -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2310b981'/%3E%3Cstop offset='100%25' stop-color='%23059669'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='40' fill='url(%23grad)'/%3E%3Cpath d='M35 45 Q50 35 65 45 L60 70 Q50 80 40 70 Z' fill='white'/%3E%3C/svg%3E">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=12">
+    <style>
+        /* Global Layout styles */
+        body { margin: 0; padding: 0; overflow-x: hidden; }
+        .app-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: var(--bg-color);
+        }
+        .global-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 50;
+            position: relative; /* ensure it stays in flow */
+        }
+        .main-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-color);
+            position: relative;
+            min-width: 0; /* prevent flex blowout */
+        }
+        /* Hide old app-header */
+        .app-header { display: none !important; }
+        
+        .sidebar-logo {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-y: auto;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            background: transparent;
+            width: 100%;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+        }
+        .nav-item:hover {
+            background: var(--bg-color);
+            color: var(--text-main);
+        }
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+        .dark-theme .nav-item.active {
+            color: var(--primary);
+            background: rgba(16, 185, 129, 0.2);
+        }
+        .nav-item i { width: 20px; height: 20px; }
+        .nav-item.text-danger { color: var(--danger); }
+        .nav-item.text-danger:hover { background: #fef2f2; }
+        .dark-theme .nav-item.text-danger:hover { background: #450a0a; }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .theme-toggle-sidebar, .user-info-sidebar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+        .theme-toggle-sidebar:hover {
+            background: var(--bg-color);
+            color: var(--text-main);
+        }
+        .view-section {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+        .view-section.active {
+            display: flex;
+        }
+        .admin-view {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .view-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .app-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            height: 100%;
+        }
+    </style>
 </head>
-<body class="dark-theme">
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-logo">
-                <div class="logo-icon">
-                    <i data-lucide="copy"></i>
-                </div>
+
+<body class="light-theme global-layout-active">
+    <div class="app-wrapper">
+        <!-- Global Sidebar Navigation -->
+        <aside class="global-sidebar" id="globalSidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon bg-tea"><i data-lucide="coffee"></i></div>
                 <div class="logo-text">
-                    <h1>PageCounter <span>Pro</span></h1>
-                    <p>ระบบแยกหน้าเอกสาร ขาวดำ-สี อัตโนมัติ</p>
+                    <h2>ChaTime</h2>
+                    <p>POS System</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <button class="btn btn-secondary btn-logout hidden" id="adminDashboardBtn" title="แผงควบคุมแอดมิน">
-                    <i data-lucide="line-chart"></i>
-                    <span>แผงควบคุม</span>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="pos" id="navPosBtn">
+                    <i data-lucide="store"></i> หน้าร้าน (POS)
                 </button>
-                <div class="theme-toggle" id="themeToggleBtn" title="เปลี่ยนธีม">
+                <button class="nav-item admin-only hidden" data-view="orders" id="navOrdersBtn">
+                    <i data-lucide="shopping-bag"></i> รายการสั่งซื้อ
+                </button>
+                <button class="nav-item admin-only hidden" data-view="dashboard" id="navDashboardBtn">
+                    <i data-lucide="pie-chart"></i> แดชบอร์ด
+                </button>
+                <button class="nav-item admin-only hidden" data-view="products" id="navProductsBtn">
+                    <i data-lucide="package"></i> จัดการสินค้า
+                </button>
+                <button class="nav-item admin-only hidden" data-view="users" id="navUsersBtn">
+                    <i data-lucide="users"></i> พนักงาน
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="theme-toggle-sidebar" id="themeToggleBtn" title="เปลี่ยนธีม">
                     <i data-lucide="sun" class="sun-icon"></i>
-                    <i data-lucide="moon" class="moon-icon"></i>
+                    <span>เปลี่ยนธีม</span>
                 </div>
-                <button class="btn btn-secondary btn-logout hidden" id="logoutBtn" title="ออกจากระบบ">
-                    <i data-lucide="log-out"></i>
-                    <span>ออกจากระบบ</span>
+                <div class="user-info-sidebar">
+                    <i data-lucide="user-circle"></i>
+                    <span class="user-badge hidden" id="currentUserBadge"></span>
+                </div>
+                <button class="nav-item text-danger hidden" id="logoutBtn" title="ออกจากระบบ">
+                    <i data-lucide="log-out"></i> ออกจากระบบ
                 </button>
             </div>
-        </header>
+        </aside>
 
-        <!-- Main Layout -->
-        <main class="app-content">
-            <!-- Left Column: Controls and Settings -->
-            <section class="control-panel">
-                <!-- Dropzone -->
-                <div class="card upload-card">
-                    <div class="drop-zone" id="dropZone">
-                        <input type="file" id="fileInput" accept="application/pdf" multiple style="display: none;">
-                        <div class="drop-zone-content">
-                            <div class="upload-icon-pulse">
-                                <i data-lucide="file-up"></i>
-                            </div>
-                            <h3>ลากไฟล์ PDF มาวางที่นี่</h3>
-                            <p>หรือคลิกเพื่อเลือกไฟล์จากเครื่อง</p>
-                            <span class="file-limits">รองรับเฉพาะไฟล์ .pdf</span>
-                        </div>
-                    </div>
-                    <!-- Selected Files List -->
-                    <div id="fileQueue" class="file-queue hidden">
-                        <h4>ไฟล์ที่เลือก:</h4>
-                        <div class="queue-list" id="queueList"></div>
-                    </div>
-                </div>
-
-                <!-- Settings -->
-                <div class="card settings-card">
-                    <div class="card-header">
-                        <i data-lucide="sliders"></i>
-                        <h3>ตั้งค่าการตรวจสอบ & ราคา</h3>
-                    </div>
-                    
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">
-                                <label for="colorThreshold">ความเข้มข้นของสี (Threshold)</label>
-                                <span class="val-badge" id="thresholdVal">18</span>
-                            </div>
-                            <input type="range" id="colorThreshold" min="5" max="50" value="18" class="slider">
-                            <span class="setting-desc">ค่าความแตกต่างของสี R, G, B (ค่าน้อย = จับสีได้ไวขึ้น)</span>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-label">
-                                <label for="minColorPercent">สัดส่วนสีขั้นต่ำต่อหน้า (%)</label>
-                                <span class="val-badge" id="percentVal">0.3%</span>
-                            </div>
-                            <input type="range" id="minColorPercent" min="0.05" max="5.00" step="0.05" value="0.30" class="slider">
-                            <span class="setting-desc">เปอร์เซ็นต์พิกเซลสีต่อหนึ่งหน้า เพื่อจำแนกเป็นหน้าสี</span>
-                        </div>
-
-                        <div class="setting-item-toggle">
-                            <div class="toggle-info">
-                                <label for="ignoreBackground">ข้ามสีพื้นหลังกระดาษสแกน</label>
-                                <span class="setting-desc">ข้ามสีโทนเหลือง/เทาอ่อนของกระดาษเก่าจากการสแกน</span>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="ignoreBackground" checked>
-                                <span class="toggle-slider round"></span>
-                            </label>
+        <!-- Main Content Area -->
+        <div class="main-content-wrapper">
+            
+            <!-- VIEW: POS -->
+            <main class="app-content view-section active" id="view-pos">
+                <section class="menu-panel">
+                    <div class="panel-header">
+                        <h2><i data-lucide="book-open"></i> เมนูเครื่องดื่ม</h2>
+                        <div class="category-filters" id="categoryFilters">
+                            <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
+                            <button class="filter-btn" data-filter="Milk Tea">ชานม</button>
+                            <button class="filter-btn" data-filter="Matcha">มัทฉะ</button>
+                            <button class="filter-btn" data-filter="Fruit Tea">ชาผลไม้</button>
+                            <button class="filter-btn" data-filter="Clear Tea">ชาใส</button>
+                            <button class="filter-btn" data-filter="Boba">ไข่มุก</button>
+                            <button class="filter-btn" data-filter="Cake">เค้ก/เบเกอรี่</button>
                         </div>
                     </div>
 
-                    <div class="settings-divider"></div>
+                    <div class="product-grid" id="productGrid">
+                        <div class="loading-state">กำลังโหลดเมนู...</div>
+                    </div>
+                </section>
 
-                    <!-- Price Settings -->
-                    <div class="price-settings">
-                        <h4>คำนวณราคาค่าพิมพ์</h4>
-                        <div class="price-inputs">
-                            <div class="price-input-group">
-                                <label for="priceBW">ขาวดำ (บาท/หน้า)</label>
-                                <div class="input-wrapper">
-                                    <span class="input-prefix">฿</span>
-                                    <input type="number" id="priceBW" min="0" value="1.00" step="0.5">
+                <section class="cart-panel">
+                    <div class="card cart-card">
+                        <div class="cart-header">
+                            <i data-lucide="shopping-cart"></i>
+                            <h3>รายการสั่งซื้อ (ออเดอร์ใหม่)</h3>
+                        </div>
+                        <div class="cart-items" id="cartItems">
+                            <div class="empty-cart" id="emptyCart">
+                                <i data-lucide="shopping-bag"></i>
+                                <p>ยังไม่มีสินค้าในตะกร้า</p>
+                                <span>คลิกที่เมนูเพื่อเพิ่มสินค้า</span>
+                            </div>
+                        </div>
+                        <div class="cart-footer">
+                            <div class="cart-summary">
+                                <div class="summary-row">
+                                    <span>ยอดรวม</span>
+                                    <span class="price-val" id="cartTotal">฿0.00</span>
                                 </div>
                             </div>
-                            <div class="price-input-group">
-                                <label for="priceColor">หน้าสี (บาท/หน้า)</label>
-                                <div class="input-wrapper">
-                                    <span class="input-prefix">฿</span>
-                                    <input type="number" id="priceColor" min="0" value="5.00" step="0.5">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-divider"></div>
-
-                    <!-- QR Code Settings -->
-                    <div class="qr-settings">
-                        <h4>QR Code สำหรับชำระเงิน</h4>
-                        <div class="qr-upload-container">
-                            <input type="file" id="qrInput" accept="image/*" style="display: none;">
-                            <div class="qr-preview-box" id="qrPreviewBox">
-                                <i data-lucide="qr-code" class="qr-placeholder-icon"></i>
-                                <span class="qr-upload-text">คลิกเพื่ออัปโหลด QR Code</span>
-                            </div>
-                            <button type="button" class="btn btn-danger btn-sm btn-block hidden" id="removeQrBtn">
-                                <i data-lucide="trash-2"></i> ลบรูป QR Code
+                            <button class="btn btn-primary btn-block btn-checkout" id="checkoutBtn" disabled>
+                                <i data-lucide="credit-card"></i> ชำระเงิน (Checkout)
                             </button>
                         </div>
                     </div>
+                </section>
+            </main>
 
-                    <button class="btn btn-secondary btn-block" id="applySettingsBtn">
-                        <i data-lucide="refresh-cw"></i>
-                        วิเคราะห์ไฟล์ใหม่อีกครั้ง
+            <!-- VIEW: ORDERS -->
+            <main class="admin-view view-section hidden" id="view-orders">
+                <div class="view-header">
+                    <h2><i data-lucide="shopping-bag"></i> รายการสั่งซื้อล่าสุด</h2>
+                    <button class="btn btn-secondary btn-sm" id="refreshOrdersBtn">
+                        <i data-lucide="refresh-cw"></i> รีเฟรชข้อมูล
                     </button>
                 </div>
-            </section>
-
-            <!-- Right Column: Results & Dashboard -->
-            <section class="results-panel">
-                <!-- Status bar for processing -->
-                <div id="statusAlert" class="status-alert hidden">
-                    <div class="spinner"></div>
-                    <div class="status-text">
-                        <h4 id="statusTitle">กำลังโหลดเอกสาร...</h4>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
-                        </div>
-                        <p id="statusDetail">กรุณารอสักครู่ ระบบกำลังอ่านข้อมูลหน้า...</p>
-                    </div>
-                    <button id="cancelProcessBtn" class="btn-icon" title="ยกเลิก">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
-
-                <!-- Dashboard Statistics -->
-                <div class="dashboard-grid">
-                    <div class="stat-card total-card">
-                        <div class="stat-icon">
-                            <i data-lucide="files"></i>
-                        </div>
-                        <div class="stat-details">
-                            <span class="stat-label">หน้าทั้งหมด</span>
-                            <span class="stat-value" id="statTotalPages">0</span>
-                            <span class="stat-subtext" id="statTotalFiles">0 ไฟล์</span>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card bw-card">
-                        <div class="stat-icon">
-                            <i data-lucide="file-text"></i>
-                        </div>
-                        <div class="stat-details">
-                            <span class="stat-label">ขาวดำ (B&W)</span>
-                            <span class="stat-value" id="statBWPages">0</span>
-                            <span class="stat-subtext" id="statBWPercent">0%</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-card color-card">
-                        <div class="stat-icon">
-                            <i data-lucide="palette"></i>
-                        </div>
-                        <div class="stat-details">
-                            <span class="stat-label">หน้าสี (Color)</span>
-                            <span class="stat-value" id="statColorPages">0</span>
-                            <span class="stat-subtext" id="statColorPercent">0%</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-card cost-card">
-                        <div class="stat-icon">
-                            <i data-lucide="credit-card"></i>
-                        </div>
-                        <div class="stat-details">
-                            <span class="stat-label">ประมาณการราคารวม</span>
-                            <span class="stat-value text-gradient" id="statTotalCost">฿0.00</span>
-                            <span class="stat-subtext">อิงตามการตั้งค่าราคา</span>
-                        </div>
+                <div class="view-body card">
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>เวลาสั่งซื้อ</th>
+                                    <th>พนักงาน (Cashier)</th>
+                                    <th>จำนวนแก้ว</th>
+                                    <th>ยอดชำระ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOrdersTableBody">
+                                <tr><td colspan="4" class="text-center py-4 text-muted">กำลังโหลด...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </main>
 
-                <!-- Page Breakdown Grid -->
-                <div class="card detail-card">
-                    <div class="detail-header">
-                        <div class="detail-title">
-                            <i data-lucide="layout-grid"></i>
-                            <h3>รายละเอียดแต่ละหน้า</h3>
-                        </div>
-                        <div class="detail-actions">
-                            <button id="exportReportBtn" class="btn btn-primary btn-sm hidden" disabled>
-                                <i data-lucide="printer"></i> พิมพ์ใบเสร็จ
-                            </button>
-                            <button id="clearAllBtn" class="btn btn-danger btn-sm hidden">
-                                <i data-lucide="trash-2"></i> ล้างข้อมูล
-                            </button>
-                        </div>
+            <!-- VIEW: DASHBOARD -->
+            <main class="admin-view view-section hidden" id="view-dashboard">
+                <div class="view-header">
+                    <h2><i data-lucide="bar-chart-2"></i> สรุปยอดขาย (Dashboard)</h2>
+                    <div class="flex gap-2 align-center">
+                        <input type="date" id="filterStartDate" class="form-control" style="width: auto; padding: 4px 8px; font-size: 14px;">
+                        <span>ถึง</span>
+                        <input type="date" id="filterEndDate" class="form-control" style="width: auto; padding: 4px 8px; font-size: 14px;">
+                        <button class="btn btn-secondary btn-sm" id="btnFilterDashboard" style="padding: 4px 8px;">
+                            <i data-lucide="search"></i>
+                        </button>
                     </div>
-
-                    <div class="empty-state" id="emptyState">
-                        <div class="empty-icon">
-                            <i data-lucide="file-search"></i>
-                        </div>
-                        <h4>ยังไม่มีข้อมูลที่จะแสดง</h4>
-                        <p>กรุณาอัปโหลดไฟล์ PDF เพื่อทำการประเมินหน้าสีและขาวดำ</p>
-                    </div>
-
-                    <!-- Page Grid Container -->
-                    <div class="page-grid hidden" id="pageGrid"></div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Preview Modal -->
-    <div class="modal" id="previewModal">
-        <div class="modal-overlay" id="modalOverlay"></div>
-        <div class="modal-content">
-            <button class="modal-close" id="modalCloseBtn">
-                <i data-lucide="x"></i>
-            </button>
-            <div class="modal-body">
-                <div class="modal-preview-container">
-                    <canvas id="modalCanvas"></canvas>
-                </div>
-                <div class="modal-sidebar">
-                    <h3 id="modalPageTitle">หน้าเอกสาร</h3>
-                    <div class="modal-info-group">
-                        <span class="info-label">ขนาดรูปภาพ:</span>
-                        <span class="info-val" id="modalPageSize">0 x 0 px</span>
-                    </div>
-                    <div class="modal-info-group">
-                        <span class="info-label">พิกเซลสีตรวจพบ:</span>
-                        <span class="info-val" id="modalColorPercent">0%</span>
-                    </div>
-                    <div class="modal-info-group">
-                        <span class="info-label">การจัดประเภท:</span>
-                        <span class="info-val" id="modalStatusBadge">ขาวดำ</span>
-                    </div>
-                    
-                    <div class="modal-action-box">
-                        <p>หากวิเคราะห์ผิดพลาด สามารถคลิกเปลี่ยนสลับประเภทได้ด้านล่าง</p>
-                        <button class="btn btn-secondary btn-block" id="modalToggleBtn">
-                            <i data-lucide="shuffle"></i> สลับประเภท (สี &lt;-&gt; ขาวดำ)
+                    <div class="flex gap-2">
+                        <button class="btn btn-primary btn-sm" id="exportPdfBtn">
+                            <i data-lucide="download"></i> ส่งออก PDF
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="refreshAdminDashboardBtn">
+                            <i data-lucide="refresh-cw"></i> รีเฟรชข้อมูล
                         </button>
                     </div>
                 </div>
-            </div>
+                <div class="view-body">
+                    <div class="admin-stats-grid">
+                        <div class="admin-stat-card">
+                            <div class="stat-icon-bg bg-blue"><i data-lucide="shopping-bag"></i></div>
+                            <div class="stat-info">
+                                <span class="label">ยอดขายวันนี้ (บิล)</span>
+                                <span class="value" id="adminTodayOrders">0</span>
+                            </div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="stat-icon-bg bg-green"><i data-lucide="dollar-sign"></i></div>
+                            <div class="stat-info">
+                                <span class="label">รายได้วันนี้</span>
+                                <span class="value text-gradient" id="adminTodayRevenue">฿0.00</span>
+                            </div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="stat-icon-bg bg-purple"><i data-lucide="credit-card"></i></div>
+                            <div class="stat-info">
+                                <span class="label">รายได้รวมทั้งหมด</span>
+                                <span class="value" id="adminTotalRevenue">฿0.00</span>
+                            </div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="stat-icon-bg bg-yellow"><i data-lucide="users"></i></div>
+                            <div class="stat-info">
+                                <span class="label">ออเดอร์รวมทั้งหมด</span>
+                                <span class="value" id="adminTotalOrders">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-charts-section mt-4">
+                        <div class="chart-container card">
+                            <h3><i data-lucide="trending-up"></i> กราฟสรุปยอดขาย 7 วันย้อนหลัง</h3>
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- VIEW: PRODUCTS -->
+            <main class="admin-view view-section hidden" id="view-products">
+                <div class="view-header flex-between align-center">
+                    <h2 class="mb-0"><i data-lucide="package"></i> จัดการสินค้า</h2>
+                    <button class="btn btn-primary" id="btnShowAddProductModal">
+                        <i data-lucide="plus"></i> เพิ่มสินค้า
+                    </button>
+                </div>
+                <div class="view-body card mt-3">
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>รูปภาพ</th>
+                                    <th>ชื่อสินค้า</th>
+                                    <th>หมวดหมู่</th>
+                                    <th>ราคา</th>
+                                    <th>จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminProductsTableBody">
+                                <tr><td colspan="5" class="text-center py-4 text-muted">กำลังโหลด...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <!-- VIEW: USERS -->
+            <main class="admin-view view-section hidden" id="view-users">
+                <div class="view-header">
+                    <h2><i data-lucide="users"></i> จัดการพนักงาน</h2>
+                </div>
+                <div class="view-body card">
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อพนักงาน</th>
+                                    <th>บทบาท (Role)</th>
+                                    <th>วันที่ลงทะเบียน</th>
+                                    <th class="text-right">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTableBody">
+                                <tr><td colspan="4" class="text-center py-4 text-muted">กำลังโหลด...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Login Overlay -->
+<!-- Login Overlay -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card" id="loginCard">
             <div class="login-header">
-                <div class="logo-icon">
-                    <i data-lucide="copy"></i>
+                <div class="logo-icon bg-tea">
+                    <i data-lucide="coffee"></i>
                 </div>
-                <h2 id="loginTitle">PageCounter <span>Pro</span></h2>
-                <p id="loginSubtitle">เข้าสู่ระบบเพื่อใช้งานระบบแยกหน้าเอกสาร</p>
+                <h2 id="loginTitle">ChaTime <span>POS</span></h2>
+                <p id="loginSubtitle">เข้าสู่ระบบ</p>
             </div>
-            
-            <!-- Login Form -->
+
             <form id="loginForm" class="login-form">
                 <div class="form-group">
-                    <label for="loginUsername">ชื่อผู้ใช้งาน (Username)</label>
+                    <label for="loginUsername">ชื่อพนักงาน (Username)</label>
                     <div class="login-input-wrapper">
                         <i data-lucide="user" class="input-icon"></i>
-                        <input type="text" id="loginUsername" required placeholder="ระบุชื่อผู้ใช้งาน" autocomplete="username">
+                        <input type="text" id="loginUsername" required placeholder="ระบุชื่อพนักงาน"
+                            autocomplete="username">
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="loginPassword">รหัสผ่าน (Password)</label>
                     <div class="login-input-wrapper">
                         <i data-lucide="lock" class="input-icon"></i>
-                        <input type="password" id="loginPassword" required placeholder="ระบุรหัสผ่าน" autocomplete="current-password">
-                        <button type="button" class="btn-toggle-password" id="togglePasswordBtn" title="แสดง/ซ่อน รหัสผ่าน">
+                        <input type="password" id="loginPassword" required placeholder="ระบุรหัสผ่าน"
+                            autocomplete="current-password">
+                        <button type="button" class="btn-toggle-password" id="togglePasswordBtn"
+                            title="แสดง/ซ่อน รหัสผ่าน">
                             <i data-lucide="eye" id="eyeIcon"></i>
                         </button>
                     </div>
-                </div>
-
-                <div class="login-options">
-                    <label class="remember-me">
-                        <input type="checkbox" id="rememberMe">
-                        <span class="checkbox-custom"></span>
-                        จดจำฉันในระบบ
-                    </label>
                 </div>
 
                 <div class="error-message hidden" id="loginError">
                     <i data-lucide="alert-circle"></i>
                     <span>ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง!</span>
                 </div>
-                
+
                 <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">
                     <i data-lucide="log-in"></i>
-                    <span>เข้าสู่ระบบ</span>
+                    <span>เข้าสู่ระบบ POS</span>
                 </button>
             </form>
 
-            <!-- Register Form -->
             <form id="registerForm" class="login-form hidden">
                 <div class="form-group">
                     <label for="registerUsername">ชื่อผู้ใช้งาน (Username)</label>
                     <div class="login-input-wrapper">
                         <i data-lucide="user" class="input-icon"></i>
-                        <input type="text" id="registerUsername" required placeholder="ระบุชื่อผู้ใช้งานสำหรับการสมัคร" autocomplete="username">
+                        <input type="text" id="registerUsername" required placeholder="ระบุชื่อผู้ใช้งาน"
+                            autocomplete="username">
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="registerPassword">รหัสผ่าน (Password)</label>
                     <div class="login-input-wrapper">
                         <i data-lucide="lock" class="input-icon"></i>
-                        <input type="password" id="registerPassword" required placeholder="ระบุรหัสผ่านสำหรับการสมัคร" autocomplete="new-password">
-                        <button type="button" class="btn-toggle-password" id="toggleRegPasswordBtn" title="แสดง/ซ่อน รหัสผ่าน">
+                        <input type="password" id="registerPassword" required placeholder="ระบุรหัสผ่าน"
+                            autocomplete="new-password">
+                        <button type="button" class="btn-toggle-password" id="toggleRegPasswordBtn"
+                            title="แสดง/ซ่อน รหัสผ่าน">
                             <i data-lucide="eye" id="regEyeIcon"></i>
                         </button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="registerConfirmPassword">ยืนยันรหัสผ่าน (Confirm Password)</label>
+                    <label for="registerConfirmPassword">ยืนยันรหัสผ่าน</label>
                     <div class="login-input-wrapper">
                         <i data-lucide="lock" class="input-icon"></i>
-                        <input type="password" id="registerConfirmPassword" required placeholder="ระบุรหัสผ่านอีกครั้ง" autocomplete="new-password">
+                        <input type="password" id="registerConfirmPassword" required placeholder="ระบุรหัสผ่านอีกครั้ง"
+                            autocomplete="new-password">
                     </div>
                 </div>
 
                 <div class="error-message hidden" id="registerError">
                     <i data-lucide="alert-circle"></i>
-                    <span id="registerErrorText">กรุณากรอกข้อมูลให้ถูกต้อง!</span>
+                    <span id="registerErrorText">ข้อมูลไม่ถูกต้อง!</span>
                 </div>
 
                 <div class="success-message hidden" id="registerSuccess">
                     <i data-lucide="check-circle"></i>
-                    <span>สมัครสมาชิกสำเร็จ! กำลังสลับไปหน้าเข้าสู่ระบบ...</span>
+                    <span>สมัครสำเร็จ!</span>
                 </div>
-                
+
                 <button type="submit" class="btn btn-primary btn-block" id="registerSubmitBtn">
                     <i data-lucide="user-plus"></i>
-                    <span>สมัครสมาชิก</span>
+                    <span>ลงทะเบียนพนักงาน</span>
                 </button>
             </form>
 
             <div class="form-toggle-link">
-                <p id="goToRegisterText">ยังไม่มีบัญชีใช้งาน? <span class="toggle-link" id="goToRegisterLink">สมัครสมาชิก</span></p>
-                <p id="goToLoginText" class="hidden">มีบัญชีใช้งานอยู่แล้ว? <span class="toggle-link" id="goToLoginLink">เข้าสู่ระบบ</span></p>
-            </div>
-
-            <div class="login-footer">
-                <p>© 2026 PageCounter Pro. สงวนลิขสิทธิ์</p>
+                <p id="goToRegisterText">ยังไม่มีบัญชีพนักงาน? <span class="toggle-link"
+                        id="goToRegisterLink">ลงทะเบียน</span></p>
+                <p id="goToLoginText" class="hidden">มีบัญชีอยู่แล้ว? <span class="toggle-link"
+                        id="goToLoginLink">เข้าสู่ระบบ</span></p>
             </div>
         </div>
     </div>
 
-    <!-- Logout Confirmation Modal -->
-    <div class="modal" id="logoutModal">
-        <div class="modal-overlay" id="logoutModalOverlay"></div>
-        <div class="modal-content modal-confirm-content">
-            <div class="modal-confirm-body">
-                <div class="confirm-icon">
-                    <i data-lucide="log-out"></i>
-                </div>
-                <h3>ยืนยันการออกจากระบบ</h3>
-                <p>คุณต้องการออกจากระบบใช่หรือไม่? ข้อมูลการนับหน้าเอกสารปัจจุบันจะถูกล้างออกจากระบบทั้งหมดเพื่อความเป็นส่วนตัว</p>
-                <div class="confirm-actions">
-                    <button class="btn btn-secondary" id="cancelLogoutBtn">ยกเลิก</button>
-                    <button class="btn btn-danger" id="confirmLogoutBtn">ออกจากระบบ</button>
-                </div>
+    
+<div class="modal hidden" id="productModal">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3 id="productModalTitle">เพิ่มสินค้า</h3>
+                <button class="close-btn" id="btnCloseProductModal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    <div class="form-group">
+                        <label for="productName">ชื่อสินค้า</label>
+                        <input type="text" id="productName" class="form-control" required placeholder="เช่น ชาไทย">
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">ราคา</label>
+                        <input type="number" id="productPrice" class="form-control" required placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">หมวดหมู่</label>
+                        <select id="productCategory" class="form-control" required>
+                            <option value="Milk Tea">Milk Tea</option>
+                            <option value="Matcha">Matcha</option>
+                            <option value="Boba">Boba</option>
+                            <option value="Clear Tea">Clear Tea</option>
+                            <option value="Fruit Tea">Fruit Tea</option>
+                            <option value="Cake">Cake</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImage">ลิงก์รูปภาพ (URL)</label>
+                        <input type="text" id="productImage" class="form-control" placeholder="/images/default.png">
+                    </div>
+                    <div class="form-actions mt-4">
+                        <button type="button" class="btn btn-secondary w-100" id="btnCancelProduct">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary w-100">บันทึกสินค้า</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Admin Dashboard Modal -->
-    <div class="modal" id="adminDashboardModal">
-        <div class="modal-overlay" id="adminDashboardModalOverlay"></div>
-        <div class="modal-content admin-dashboard-content">
-            <button class="modal-close" id="adminDashboardModalCloseBtn">
+    <!-- Chatbot UI -->
+    <div id="chatbot-toggle" class="chatbot-toggle" aria-label="Open Chatbot">
+        <i data-lucide="message-circle"></i>
+    </div>
+
+    <div id="chatbot-window" class="chatbot-window hidden">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i data-lucide="bot"></i> POS Assistant
+            </div>
+            <button id="chatbot-close" class="chatbot-close">
                 <i data-lucide="x"></i>
             </button>
-            <div class="modal-body admin-modal-body">
-                <div class="dashboard-header-inline">
-                    <h2><i data-lucide="shield-check"></i> แผงควบคุมผู้ดูแลระบบ <span>(Admin Dashboard)</span></h2>
-                    <button class="btn btn-secondary btn-sm" id="refreshAdminDashboardBtn">
-                        <i data-lucide="refresh-cw"></i> รีเฟรชข้อมูล
-                    </button>
-                </div>
+        </div>
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div class="message bot-message">
+                สวัสดีครับ มีอะไรให้ผมช่วยไหมครับ? (เช่น พิมพ์ "เมนู", "วิธีใช้งาน")
+            </div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatbot-input" placeholder="พิมพ์ข้อความ..." />
+            <button id="chatbot-send">
+                <i data-lucide="send"></i>
+            </button>
+        </div>
+    </div>
 
-                <!-- Admin Statistics Grid -->
-                <div class="admin-stats-grid">
-                    <div class="admin-stat-card">
-                        <div class="stat-icon-bg bg-blue">
-                            <i data-lucide="file-text"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="label">ไฟล์ประเมินทั้งหมด</span>
-                            <span class="value" id="adminTotalFiles">0</span>
-                        </div>
-                    </div>
-                    <div class="admin-stat-card">
-                        <div class="stat-icon-bg bg-green">
-                            <i data-lucide="copy"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="label">จำนวนหน้าทั้งหมด</span>
-                            <span class="value" id="adminTotalPages">0</span>
-                        </div>
-                    </div>
-                    <div class="admin-stat-card">
-                        <div class="stat-icon-bg bg-purple">
-                            <i data-lucide="credit-card"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="label">รายได้ประมาณการรวม</span>
-                            <span class="value text-gradient" id="adminTotalRevenue">฿0.00</span>
-                        </div>
-                    </div>
-                    <div class="admin-stat-card">
-                        <div class="stat-icon-bg bg-yellow">
-                            <i data-lucide="users"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="label">ผู้ใช้ที่ลงทะเบียน</span>
-                            <span class="value" id="adminTotalUsers">0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab Buttons -->
-                <div class="admin-tab-container">
-                    <button class="admin-tab-btn active" id="tabLogsBtn">ประวัติการใช้บริการล่าสุด</button>
-                    <button class="admin-tab-btn" id="tabUsersBtn">รายชื่อสมาชิกทั้งหมด</button>
-                </div>
-
-                <!-- Tab Contents: Logs Table -->
-                <div class="admin-tab-content" id="tabLogsContent">
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>วัน-เวลา</th>
-                                    <th>ผู้ใช้งาน</th>
-                                    <th>ชื่อไฟล์</th>
-                                    <th>หน้าทั้งหมด</th>
-                                    <th>ขาวดำ</th>
-                                    <th>สี</th>
-                                    <th>ราคารวม</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminLogsTableBody">
-                                <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">กำลังโหลดประวัติข้อมูล...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Tab Contents: Users Table -->
-                <div class="admin-tab-content hidden" id="tabUsersContent">
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>วันที่สมัคร</th>
-                                    <th>ชื่อผู้ใช้งาน (Username)</th>
-                                    <th>บทบาท (Role)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminUsersTableBody">
-                                <tr>
-                                    <td colspan="3" class="text-center py-4 text-muted">กำลังโหลดรายชื่อสมาชิก...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <!-- Custom Confirm Modal -->
+    <div id="customConfirm" class="custom-confirm-overlay hidden">
+        <div class="custom-confirm-box">
+            <div class="confirm-icon">
+                <i data-lucide="alert-circle"></i>
+            </div>
+            <h3 id="confirmTitle">ยืนยันการทำรายการ</h3>
+            <p id="confirmMessage">คุณต้องการดำเนินการต่อใช่หรือไม่?</p>
+            <div class="confirm-actions">
+                <button id="confirmCancelBtn" class="btn-cancel">ยกเลิก</button>
+                <button id="confirmOkBtn" class="btn-primary">ตกลง</button>
             </div>
         </div>
     </div>
 
-    <!-- PDF.js CDN library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script src="app.js" type="module"></script>
+    <!-- Password Modal -->
+    <div id="passwordModal" class="custom-confirm-overlay hidden">
+        <div class="custom-confirm-box">
+            <div class="confirm-icon" style="background: #e0e7ff; color: #4f46e5;">
+                <i data-lucide="key"></i>
+            </div>
+            <h3>เปลี่ยนรหัสผ่าน</h3>
+            <p id="passwordModalMessage">กำหนดรหัสผ่านใหม่สำหรับผู้ใช้นี้</p>
+            
+            <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
+                <label>รหัสผ่านใหม่</label>
+                <input type="password" id="newPasswordInput" class="form-control" placeholder="ตั้งรหัสผ่านใหม่อย่างน้อย 4 ตัวอักษร">
+                <div id="passwordModalError" class="text-danger mt-1 text-sm hidden"></div>
+            </div>
+
+            <div class="confirm-actions">
+                <button id="passwordCancelBtn" class="btn-cancel">ยกเลิก</button>
+                <button id="passwordSaveBtn" class="btn-primary" style="background: #4f46e5;">บันทึกรหัสผ่าน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script imports -->
+    <script src="node_modules/chart.js/dist/chart.umd.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="app.js?v=9" type="module"></script>
 </body>
 </html>
