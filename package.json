@@ -1,5 +1,5 @@
 {
-  "name": "page-counter-pro",
+  "name": "tea-shop-management",
   "version": "1.0.0",
   "description": "Web application to analyze PDF pages and classify them as color or black & white.",
   "main": "index.html",
